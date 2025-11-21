@@ -1,6 +1,11 @@
 queue_rules:
   - name: default
-    conditions:
+    merge_method: squash
+    commit_message_template: |
+      {{ title }} (#{{ number }})
+
+      {{ body }}
+    queue_conditions:
       - check-success=test
       - check-success=lint
       - check-success=build
@@ -23,11 +28,6 @@ pull_request_rules:
         message: "Automatically approving Dependabot minor/patch update"
       queue:
         name: default
-        method: squash
-        commit_message_template: |
-          {{ title }} (#{{ number }})
-
-          {{ body }}
 
   # Label Dependabot PRs
   - name: Label Dependabot PRs
@@ -51,7 +51,6 @@ pull_request_rules:
     actions:
       queue:
         name: default
-        method: squash
 
   # Request review from maintainers for new PRs
   - name: Request review from maintainers
@@ -64,11 +63,10 @@ pull_request_rules:
         teams:
           - "@mmga-lab/maintainers"
 
-  # Add size labels
+  # Add size labels based on file count
   - name: Label PR size XS
     conditions:
-      - files<=5
-      - changes<50
+      - "#files<=5"
     actions:
       label:
         add:
@@ -76,10 +74,8 @@ pull_request_rules:
 
   - name: Label PR size S
     conditions:
-      - files>5
-      - files<=15
-      - changes>=50
-      - changes<200
+      - "#files>5"
+      - "#files<=15"
     actions:
       label:
         add:
@@ -87,10 +83,8 @@ pull_request_rules:
 
   - name: Label PR size M
     conditions:
-      - files>15
-      - files<=30
-      - changes>=200
-      - changes<500
+      - "#files>15"
+      - "#files<=30"
     actions:
       label:
         add:
@@ -98,10 +92,8 @@ pull_request_rules:
 
   - name: Label PR size L
     conditions:
-      - files>30
-      - files<=50
-      - changes>=500
-      - changes<1000
+      - "#files>30"
+      - "#files<=50"
     actions:
       label:
         add:
@@ -109,8 +101,7 @@ pull_request_rules:
 
   - name: Label PR size XL
     conditions:
-      - files>50
-      - changes>=1000
+      - "#files>50"
     actions:
       label:
         add:
@@ -143,7 +134,6 @@ pull_request_rules:
       - label!=do-not-merge
     actions:
       update:
-        method: merge
 
   # Label PRs by type based on title
   - name: Label bug fixes
