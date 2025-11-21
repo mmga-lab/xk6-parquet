@@ -96,6 +96,7 @@ func (p *Parquet) Read(filename string, options ...map[string]interface{}) ([]ma
 	}
 
 	// Open the file
+	// #nosec G304 -- Users need to open files specified in k6 scripts
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %w", err)
@@ -175,6 +176,7 @@ func (p *Parquet) Read(filename string, options ...map[string]interface{}) ([]ma
 // ReadChunked reads a Parquet file in chunks, calling the provided callback for each chunk.
 // This is useful for processing large files without loading them entirely into memory.
 func (p *Parquet) ReadChunked(filename string, chunkSize int, callback func([]map[string]interface{}) error) error {
+	// #nosec G304 -- Users need to open files specified in k6 scripts
 	file, err := os.Open(filename)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %w", err)

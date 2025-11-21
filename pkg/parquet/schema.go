@@ -9,6 +9,7 @@ import (
 
 // GetSchema retrieves and returns the schema of a Parquet file.
 func (p *Parquet) GetSchema(filename string) (map[string]interface{}, error) {
+	// #nosec G304 -- Users need to open files specified in k6 scripts
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %w", err)
@@ -30,6 +31,7 @@ func (p *Parquet) GetSchema(filename string) (map[string]interface{}, error) {
 
 // GetMetadata retrieves and returns metadata about a Parquet file.
 func (p *Parquet) GetMetadata(filename string) (map[string]interface{}, error) {
+	// #nosec G304 -- Users need to open files specified in k6 scripts
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %w", err)
