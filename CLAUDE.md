@@ -157,6 +157,6 @@ This file is required for xk6 to find and register the extension. Without it, `x
 ## Project Constraints
 
 - Go 1.24+ required (set in go.mod)
-- Depends on k6 v0.49.0 and parquet-go v0.20.1
+- Depends on k6 v0.49.0 and parquet-go v0.25.1
 - Must maintain compatibility with k6's module system and VU isolation model
 - The register.go file in the root is mandatory for xk6 builds
