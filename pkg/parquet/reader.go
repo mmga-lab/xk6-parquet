@@ -120,6 +120,11 @@ func (p *Parquet) Read(filename string, options ...map[string]interface{}) ([]ma
 	rowsRead := 0
 	rowsSkipped := 0
 
+	// Seek back to start for row reader
+	if _, err := file.Seek(0, 0); err != nil {
+		return nil, fmt.Errorf("failed to seek to beginning: %w", err)
+	}
+
 	// Create reader
 	reader := parquet.NewReader(file)
 	defer reader.Close()
@@ -128,7 +133,7 @@ func (p *Parquet) Read(filename string, options ...map[string]interface{}) ([]ma
 	rowBuffer := make([]parquet.Row, opts.BufferSize)
 	for {
 		n, err := reader.ReadRows(rowBuffer)
-		if n == 0 || err != nil {
+		if n == 0 {
 			break
 		}
 
@@ -165,6 +170,11 @@ func (p *Parquet) Read(filename string, options ...map[string]interface{}) ([]ma
 		if opts.RowLimit > 0 && rowsRead >= opts.RowLimit {
 			break
 		}
+
+		// Break on error after processing rows
+		if err != nil {
+			break
+		}
 	}
 
 	// Cache results
@@ -193,6 +203,11 @@ func (p *Parquet) ReadChunked(filename string, chunkSize int, callback func([]ma
 		return fmt.Errorf("failed to open parquet file: %w", err)
 	}
 
+	// Seek back to start for row reader
+	if _, err := file.Seek(0, 0); err != nil {
+		return fmt.Errorf("failed to seek to beginning: %w", err)
+	}
+
 	reader := parquet.NewReader(file)
 	defer reader.Close()
 
@@ -201,7 +216,7 @@ func (p *Parquet) ReadChunked(filename string, chunkSize int, callback func([]ma
 
 	for {
 		n, err := reader.ReadRows(rowBuffer)
-		if n == 0 || err != nil {
+		if n == 0 {
 			break
 		}
 
@@ -212,11 +227,16 @@ func (p *Parquet) ReadChunked(filename string, chunkSize int, callback func([]ma
 
 			// Call callback when chunk size is reached
 			if len(chunk) >= chunkSize {
-				if err := callback(chunk); err != nil {
-					return err
+				if cbErr := callback(chunk); cbErr != nil {
+					return cbErr
 				}
 				chunk = make([]map[string]interface{}, 0, chunkSize)
 			}
+		}
+
+		// Break on error after processing rows
+		if err != nil {
+			break
 		}
 	}
 
