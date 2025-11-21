@@ -69,40 +69,54 @@ func (p *Parquet) Read(filename string, options ...map[string]interface{}) ([]ma
 		return nil, fmt.Errorf("failed to open parquet file: %w", err)
 	}
 
-	// Read data
+	// Read data using generic reader
 	results := make([]map[string]interface{}, 0)
 	rowsRead := 0
+	rowsSkipped := 0
 
-	for _, rowGroup := range pf.RowGroups() {
+	// Create reader for the file
+	reader := parquet.NewGenericReader[map[string]any](pf)
+	defer reader.Close()
+
+	// Read rows
+	for {
 		if opts.RowLimit > 0 && rowsRead >= opts.RowLimit {
 			break
 		}
 
-		rows := rowGroup.Rows()
-		defer rows.Close()
-
-		for {
-			if opts.RowLimit > 0 && rowsRead >= opts.RowLimit {
-				break
-			}
-
-			row := make([]parquet.Value, len(pf.Schema().Fields()))
-			n, err := rows.ReadValues(row)
-			if n == 0 || err != nil {
-				break
-			}
-
-			// Skip specified rows
-			if rowsRead < opts.SkipRows {
-				rowsRead++
-				continue
-			}
-
-			// Convert row to map
-			rowMap := convertRow(pf.Schema(), row, opts.Columns)
-			results = append(results, rowMap)
-			rowsRead++
+		rows := make([]map[string]any, 1)
+		n, err := reader.Read(rows)
+		if n == 0 || err != nil {
+			break
 		}
+
+		// Skip specified rows
+		if rowsSkipped < opts.SkipRows {
+			rowsSkipped++
+			continue
+		}
+
+		row := rows[0]
+
+		// Filter columns if specified
+		if len(opts.Columns) > 0 {
+			filtered := make(map[string]interface{})
+			for _, col := range opts.Columns {
+				if val, ok := row[col]; ok {
+					filtered[col] = val
+				}
+			}
+			results = append(results, filtered)
+		} else {
+			// Convert map[string]any to map[string]interface{}
+			converted := make(map[string]interface{}, len(row))
+			for k, v := range row {
+				converted[k] = v
+			}
+			results = append(results, converted)
+		}
+
+		rowsRead++
 	}
 
 	// Cache results
@@ -130,29 +144,34 @@ func (p *Parquet) ReadChunked(filename string, chunkSize int, callback func([]ma
 		return fmt.Errorf("failed to open parquet file: %w", err)
 	}
 
+	reader := parquet.NewGenericReader[map[string]any](pf)
+	defer reader.Close()
+
 	chunk := make([]map[string]interface{}, 0, chunkSize)
 
-	for _, rowGroup := range pf.RowGroups() {
-		rows := rowGroup.Rows()
-		defer rows.Close()
+	for {
+		rows := make([]map[string]any, chunkSize)
+		n, err := reader.Read(rows)
+		if n == 0 || err != nil {
+			break
+		}
 
-		for {
-			row := make([]parquet.Value, len(pf.Schema().Fields()))
-			n, err := rows.ReadValues(row)
-			if n == 0 || err != nil {
-				break
+		// Convert and add to chunk
+		for i := 0; i < n; i++ {
+			row := rows[i]
+			converted := make(map[string]interface{}, len(row))
+			for k, v := range row {
+				converted[k] = v
 			}
+			chunk = append(chunk, converted)
+		}
 
-			rowMap := convertRow(pf.Schema(), row, nil)
-			chunk = append(chunk, rowMap)
-
-			// Call callback when chunk size is reached
-			if len(chunk) >= chunkSize {
-				if err := callback(chunk); err != nil {
-					return err
-				}
-				chunk = make([]map[string]interface{}, 0, chunkSize)
+		// Call callback when chunk size is reached
+		if len(chunk) >= chunkSize {
+			if err := callback(chunk); err != nil {
+				return err
 			}
+			chunk = make([]map[string]interface{}, 0, chunkSize)
 		}
 	}
 
