@@ -1,0 +1,195 @@
+queue_rules:
+  - name: default
+    conditions:
+      - check-success=test
+      - check-success=lint
+      - check-success=build
+
+pull_request_rules:
+  # Automatically merge Dependabot PRs for minor and patch updates
+  - name: Automatic merge for Dependabot minor and patch updates
+    conditions:
+      - author=dependabot[bot]
+      - check-success=test
+      - check-success=lint
+      - check-success=build
+      - or:
+        - title~=^chore\(deps\): bump .* from .* to .*\.(minor|patch)
+        - title~=^chore\(ci\): bump .*
+        - body~=(minor|patch) update
+    actions:
+      review:
+        type: APPROVE
+        message: "Automatically approving Dependabot minor/patch update"
+      queue:
+        name: default
+        method: squash
+        commit_message_template: |
+          {{ title }} (#{{ number }})
+
+          {{ body }}
+
+  # Label Dependabot PRs
+  - name: Label Dependabot PRs
+    conditions:
+      - author=dependabot[bot]
+    actions:
+      label:
+        add:
+          - dependencies
+
+  # Auto-merge approved PRs with all checks passing
+  - name: Automatic merge on approval
+    conditions:
+      - "#approved-reviews-by>=1"
+      - check-success=test
+      - check-success=lint
+      - check-success=build
+      - "#changes-requested-reviews-by=0"
+      - label!=work-in-progress
+      - label!=do-not-merge
+    actions:
+      queue:
+        name: default
+        method: squash
+
+  # Request review from maintainers for new PRs
+  - name: Request review from maintainers
+    conditions:
+      - "#approved-reviews-by=0"
+      - -author=dependabot[bot]
+      - -draft
+    actions:
+      request_reviews:
+        teams:
+          - "@mmga-lab/maintainers"
+
+  # Add size labels
+  - name: Label PR size XS
+    conditions:
+      - files<=5
+      - changes<50
+    actions:
+      label:
+        add:
+          - size/xs
+
+  - name: Label PR size S
+    conditions:
+      - files>5
+      - files<=15
+      - changes>=50
+      - changes<200
+    actions:
+      label:
+        add:
+          - size/s
+
+  - name: Label PR size M
+    conditions:
+      - files>15
+      - files<=30
+      - changes>=200
+      - changes<500
+    actions:
+      label:
+        add:
+          - size/m
+
+  - name: Label PR size L
+    conditions:
+      - files>30
+      - files<=50
+      - changes>=500
+      - changes<1000
+    actions:
+      label:
+        add:
+          - size/l
+
+  - name: Label PR size XL
+    conditions:
+      - files>50
+      - changes>=1000
+    actions:
+      label:
+        add:
+          - size/xl
+
+  # Warn on conflicts
+  - name: Warn on conflicts
+    conditions:
+      - conflict
+    actions:
+      comment:
+        message: "This pull request has conflicts with the base branch. Please resolve them."
+      label:
+        add:
+          - conflicts
+
+  - name: Remove conflict label when resolved
+    conditions:
+      - -conflict
+    actions:
+      label:
+        remove:
+          - conflicts
+
+  # Auto-update PRs when base branch is updated
+  - name: Automatic update on base branch changes
+    conditions:
+      - -conflict
+      - -draft
+      - label!=do-not-merge
+    actions:
+      update:
+        method: merge
+
+  # Label PRs by type based on title
+  - name: Label bug fixes
+    conditions:
+      - title~=^fix(\(.*\))?:
+    actions:
+      label:
+        add:
+          - bug
+
+  - name: Label features
+    conditions:
+      - title~=^feat(\(.*\))?:
+    actions:
+      label:
+        add:
+          - enhancement
+
+  - name: Label documentation
+    conditions:
+      - title~=^docs(\(.*\))?:
+    actions:
+      label:
+        add:
+          - documentation
+
+  - name: Label refactoring
+    conditions:
+      - title~=^refactor(\(.*\))?:
+    actions:
+      label:
+        add:
+          - refactoring
+
+  - name: Label tests
+    conditions:
+      - title~=^test(\(.*\))?:
+    actions:
+      label:
+        add:
+          - tests
+
+  - name: Label CI/CD changes
+    conditions:
+      - title~=^chore\(ci\):
+    actions:
+      label:
+        add:
+          - ci/cd

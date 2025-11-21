@@ -1,6 +1,10 @@
 # xk6-parquet
 
+[![Test](https://github.com/mmga-lab/xk6-parquet/actions/workflows/test.yml/badge.svg)](https://github.com/mmga-lab/xk6-parquet/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/mmga-lab/xk6-parquet/branch/main/graph/badge.svg)](https://codecov.io/gh/mmga-lab/xk6-parquet)
 [![Go Report Card](https://goreportcard.com/badge/github.com/mmga-lab/xk6-parquet)](https://goreportcard.com/report/github.com/mmga-lab/xk6-parquet)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/mmga-lab/xk6-parquet)](go.mod)
+[![Latest Release](https://img.shields.io/github/v/release/mmga-lab/xk6-parquet)](https://github.com/mmga-lab/xk6-parquet/releases)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 A [k6 extension](https://k6.io/docs/extensions/) that enables reading Apache Parquet files directly in k6 load testing scripts.

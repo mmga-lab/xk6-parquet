@@ -1,0 +1,31 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 5%
+        informational: false
+    patch:
+      default:
+        target: 70%
+        threshold: 10%
+        informational: true
+
+  precision: 2
+  round: down
+  range: "60...100"
+
+comment:
+  layout: "header, diff, files, footer"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+ignore:
+  - "examples/**"
+  - "**/*_test.go"
+  - "register.go"
+
+github_checks:
+  annotations: true

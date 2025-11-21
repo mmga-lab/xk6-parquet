@@ -1,0 +1,116 @@
+name: Bug Report
+description: Report a bug or unexpected behavior in xk6-parquet
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Run k6 script with '...'
+        2. Load Parquet file '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: I expected...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Instead...
+    validations:
+      required: true
+
+  - type: textarea
+    id: code-sample
+    attributes:
+      label: Code Sample
+      description: If applicable, provide a minimal reproducible code sample
+      placeholder: |
+        ```javascript
+        import parquet from 'k6/x/parquet';
+        // Your code here
+        ```
+      render: javascript
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Please copy and paste any relevant log output
+      render: shell
+
+  - type: input
+    id: k6-version
+    attributes:
+      label: k6 Version
+      description: What version of k6 are you running? (output of `./k6 version`)
+      placeholder: k6 v0.49.0
+    validations:
+      required: true
+
+  - type: input
+    id: extension-version
+    attributes:
+      label: xk6-parquet Version
+      description: What version of xk6-parquet are you using?
+      placeholder: v0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: go-version
+    attributes:
+      label: Go Version
+      description: What version of Go are you using? (output of `go version`)
+      placeholder: go1.24.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system are you using?
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here
+      placeholder: Any additional information that might be helpful

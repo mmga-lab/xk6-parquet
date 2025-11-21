@@ -1,0 +1,32 @@
+# CODEOWNERS file for xk6-parquet
+#
+# This file defines code owners who will automatically be requested for review
+# when someone opens a pull request that modifies code they own.
+#
+# Learn more: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repository
+* @mmga-lab/maintainers
+
+# GitHub configuration files
+/.github/ @mmga-lab/maintainers
+
+# Core extension code
+/pkg/parquet/ @mmga-lab/maintainers
+
+# Examples and documentation
+/examples/ @mmga-lab/maintainers
+*.md @mmga-lab/maintainers
+
+# Build and CI/CD
+/Makefile @mmga-lab/maintainers
+/.github/workflows/ @mmga-lab/maintainers
+/.github/dependabot.yml @mmga-lab/maintainers
+/.github/mergify.yml @mmga-lab/maintainers
+
+# Go module files
+/go.mod @mmga-lab/maintainers
+/go.sum @mmga-lab/maintainers
+
+# Test files
+*_test.go @mmga-lab/maintainers
