@@ -1,0 +1,12 @@
+.git
+.github
+.gitignore
+*.md
+LICENSE
+examples
+tests
+docs
+*.test
+coverage.txt
+k6
+dist
