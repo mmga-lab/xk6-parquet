@@ -6,14 +6,17 @@ import (
 	"github.com/parquet-go/parquet-go"
 )
 
+// TestRecord is a simple struct for testing schema conversion
+type TestRecord struct {
+	ID     int64  `parquet:"id"`
+	Name   string `parquet:"name"`
+	Age    int32  `parquet:"age"`
+	Active bool   `parquet:"active"`
+}
+
 func TestConvertSchema(t *testing.T) {
-	// Create a simple schema
-	schema := parquet.NewSchema("test", parquet.Group{
-		"id":     parquet.Int64(),
-		"name":   parquet.String(),
-		"age":    parquet.Int32(),
-		"active": parquet.Boolean(),
-	})
+	// Create a schema from the test struct
+	schema := parquet.SchemaOf(TestRecord{})
 
 	result := ConvertSchema(schema)
 
@@ -53,24 +56,28 @@ func TestConvertSchema(t *testing.T) {
 }
 
 func TestGetLogicalType(t *testing.T) {
+	// Create schema and get fields from it
+	schema := parquet.SchemaOf(TestRecord{})
+	fields := schema.Fields()
+
 	tests := []struct {
 		name     string
 		field    parquet.Field
 		expected string
 	}{
 		{
-			name:     "String type",
-			field:    parquet.String(),
+			name:     "String type (name field)",
+			field:    fields[1], // name field
 			expected: "STRING",
 		},
 		{
-			name:     "Int64 without logical type",
-			field:    parquet.Int64(),
+			name:     "Int64 without logical type (id field)",
+			field:    fields[0], // id field
 			expected: "",
 		},
 		{
-			name:     "Boolean",
-			field:    parquet.Boolean(),
+			name:     "Boolean (active field)",
+			field:    fields[3], // active field
 			expected: "",
 		},
 	}

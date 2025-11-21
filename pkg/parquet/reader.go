@@ -7,6 +7,51 @@ import (
 	"github.com/parquet-go/parquet-go"
 )
 
+// valueToInterface converts a parquet.Value to a Go interface{} based on its kind
+func valueToInterface(value parquet.Value) interface{} {
+	if value.IsNull() {
+		return nil
+	}
+
+	switch value.Kind() {
+	case parquet.Boolean:
+		return value.Boolean()
+	case parquet.Int32:
+		return value.Int32()
+	case parquet.Int64:
+		return value.Int64()
+	case parquet.Int96:
+		return value.Int96()
+	case parquet.Float:
+		return value.Float()
+	case parquet.Double:
+		return value.Double()
+	case parquet.ByteArray:
+		return string(value.ByteArray())
+	case parquet.FixedLenByteArray:
+		return value.ByteArray()
+	default:
+		return value.String()
+	}
+}
+
+// rowToMap converts a parquet.Row to a map[string]interface{}
+func rowToMap(row parquet.Row, schema *parquet.Schema) map[string]interface{} {
+	result := make(map[string]interface{})
+	fields := schema.Fields()
+
+	// Group values by column index
+	for _, value := range row {
+		columnIndex := value.Column()
+		if columnIndex >= 0 && columnIndex < len(fields) {
+			field := fields[columnIndex]
+			result[field.Name()] = valueToInterface(value)
+		}
+	}
+
+	return result
+}
+
 // ReadOptions defines options for reading Parquet files.
 type ReadOptions struct {
 	Columns    []string `json:"columns"`    // Specific columns to read
@@ -69,54 +114,56 @@ func (p *Parquet) Read(filename string, options ...map[string]interface{}) ([]ma
 		return nil, fmt.Errorf("failed to open parquet file: %w", err)
 	}
 
-	// Read data using generic reader
+	// Read data using row-based reader
 	results := make([]map[string]interface{}, 0)
 	rowsRead := 0
 	rowsSkipped := 0
 
-	// Create reader for the file
-	reader := parquet.NewGenericReader[map[string]any](pf)
+	// Create reader
+	reader := parquet.NewReader(file)
 	defer reader.Close()
 
-	// Read rows
+	// Read rows in batches
+	rowBuffer := make([]parquet.Row, opts.BufferSize)
 	for {
-		if opts.RowLimit > 0 && rowsRead >= opts.RowLimit {
-			break
-		}
-
-		rows := make([]map[string]any, 1)
-		n, err := reader.Read(rows)
+		n, err := reader.ReadRows(rowBuffer)
 		if n == 0 || err != nil {
 			break
 		}
 
-		// Skip specified rows
-		if rowsSkipped < opts.SkipRows {
-			rowsSkipped++
-			continue
-		}
+		for i := 0; i < n; i++ {
+			if opts.RowLimit > 0 && rowsRead >= opts.RowLimit {
+				break
+			}
 
-		row := rows[0]
+			// Skip specified rows
+			if rowsSkipped < opts.SkipRows {
+				rowsSkipped++
+				continue
+			}
 
-		// Filter columns if specified
-		if len(opts.Columns) > 0 {
-			filtered := make(map[string]interface{})
-			for _, col := range opts.Columns {
-				if val, ok := row[col]; ok {
-					filtered[col] = val
+			// Convert row to map
+			row := rowToMap(rowBuffer[i], pf.Schema())
+
+			// Filter columns if specified
+			if len(opts.Columns) > 0 {
+				filtered := make(map[string]interface{})
+				for _, col := range opts.Columns {
+					if val, ok := row[col]; ok {
+						filtered[col] = val
+					}
 				}
+				results = append(results, filtered)
+			} else {
+				results = append(results, row)
 			}
-			results = append(results, filtered)
-		} else {
-			// Convert map[string]any to map[string]interface{}
-			converted := make(map[string]interface{}, len(row))
-			for k, v := range row {
-				converted[k] = v
-			}
-			results = append(results, converted)
+
+			rowsRead++
 		}
 
-		rowsRead++
+		if opts.RowLimit > 0 && rowsRead >= opts.RowLimit {
+			break
+		}
 	}
 
 	// Cache results
@@ -144,34 +191,30 @@ func (p *Parquet) ReadChunked(filename string, chunkSize int, callback func([]ma
 		return fmt.Errorf("failed to open parquet file: %w", err)
 	}
 
-	reader := parquet.NewGenericReader[map[string]any](pf)
+	reader := parquet.NewReader(file)
 	defer reader.Close()
 
 	chunk := make([]map[string]interface{}, 0, chunkSize)
+	rowBuffer := make([]parquet.Row, 100) // Read in small batches
 
 	for {
-		rows := make([]map[string]any, chunkSize)
-		n, err := reader.Read(rows)
+		n, err := reader.ReadRows(rowBuffer)
 		if n == 0 || err != nil {
 			break
 		}
 
-		// Convert and add to chunk
 		for i := 0; i < n; i++ {
-			row := rows[i]
-			converted := make(map[string]interface{}, len(row))
-			for k, v := range row {
-				converted[k] = v
-			}
-			chunk = append(chunk, converted)
-		}
+			// Convert row to map
+			row := rowToMap(rowBuffer[i], pf.Schema())
+			chunk = append(chunk, row)
 
-		// Call callback when chunk size is reached
-		if len(chunk) >= chunkSize {
-			if err := callback(chunk); err != nil {
-				return err
+			// Call callback when chunk size is reached
+			if len(chunk) >= chunkSize {
+				if err := callback(chunk); err != nil {
+					return err
+				}
+				chunk = make([]map[string]interface{}, 0, chunkSize)
 			}
-			chunk = make([]map[string]interface{}, 0, chunkSize)
 		}
 	}
 

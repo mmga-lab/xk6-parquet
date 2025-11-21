@@ -8,6 +8,9 @@
 *.so
 *.dylib
 
+# k6 binary built by xk6
+k6
+
 # Test binary, built with `go test -c`
 *.test
 
@@ -30,3 +33,7 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Large test data files (can be regenerated with 'make generate-data')
+examples/data/medium.parquet
+examples/data/large.parquet
