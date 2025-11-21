@@ -136,7 +136,7 @@ When adding new methods to the module:
 ## CI/CD
 
 GitHub Actions runs on pushes to `main`, `develop`, and `claude/**` branches:
-- **Test job**: Go 1.21 and 1.22 with race detector and coverage
+- **Test job**: Go 1.24 and 1.25 with race detector and coverage
 - **Lint job**: golangci-lint with 5m timeout
 - **Build job**: Full xk6 build to verify extension compiles
 
@@ -156,7 +156,7 @@ This file is required for xk6 to find and register the extension. Without it, `x
 
 ## Project Constraints
 
-- Go 1.21+ required (set in go.mod)
+- Go 1.24+ required (set in go.mod)
 - Depends on k6 v0.49.0 and parquet-go v0.20.1
 - Must maintain compatibility with k6's module system and VU isolation model
 - The register.go file in the root is mandatory for xk6 builds
