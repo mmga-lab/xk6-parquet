@@ -41,7 +41,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 
 ### Prerequisites
 
-- Go 1.21 or later
+- Go 1.24 or later
 - xk6 (`go install go.k6.io/xk6/cmd/xk6@latest`)
 - Git
 
