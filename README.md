@@ -26,7 +26,7 @@ A [k6 extension](https://k6.io/docs/extensions/) that enables reading Apache Par
 
 ### Prerequisites
 
-- Go 1.21 or later
+- Go 1.24 or later
 - [xk6](https://github.com/grafana/xk6) - k6 extension builder
 
 ### Build from Source
