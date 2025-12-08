@@ -1,10 +1,10 @@
 module github.com/mmga-lab/xk6-parquet
 
-go 1.24.0
+go 1.24.9
 
 require (
-	github.com/parquet-go/parquet-go v0.25.1
-	go.k6.io/k6 v1.4.1
+	github.com/parquet-go/parquet-go v0.26.0
+	go.k6.io/k6 v1.4.2
 )
 
 require (
@@ -18,7 +18,7 @@ require (
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
 	github.com/google/pprof v0.0.0-20250403155104-27863c87afa6 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/grafana/sobek v0.0.0-20251030131753-d05c9166857d // indirect
+	github.com/grafana/sobek v0.0.0-20251124090928-9a028a30ff58 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
@@ -28,6 +28,8 @@ require (
 	github.com/mstoykov/atlas v0.0.0-20220811071828-388f114305dd // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/onsi/gomega v1.38.2 // indirect
+	github.com/parquet-go/bitpack v0.2.0 // indirect
+	github.com/parquet-go/jsonlite v0.8.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/serenize/snaker v0.0.0-20201027110005-a7ad2135616e // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
@@ -42,7 +44,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.8.0 // indirect
 	golang.org/x/net v0.46.0 // indirect
-	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/text v0.30.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250825161204-c5933d9347a5 // indirect
