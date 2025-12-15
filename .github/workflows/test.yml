@@ -24,7 +24,7 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Cache Go modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/go-build
@@ -109,7 +109,7 @@ jobs:
         run: ./k6 version
 
       - name: Upload k6 binary
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: k6-with-parquet
           path: ./k6
